@@ -9,8 +9,8 @@ def split_dataset(input_folder, train_folder, test_folder, validation_split=0.2,
     :param input_folder: Path to the input folder
     :param train_folder: Path to the train folder
     :param test_folder: Path to the test folder
-    :param validation_split:
-    :param random_seed:
+    :param validation_split: Fraction of the images to move to the test folder
+    :param random_seed: Random seed (for shuffling the images)
     :return:
     """
     if random_seed is not None:
@@ -33,7 +33,7 @@ def split_dataset(input_folder, train_folder, test_folder, validation_split=0.2,
                 os.makedirs(test_class_path)
 
             images = os.listdir(class_path)
-            random.shuffle(images) # Shuffle the images randomly
+            random.shuffle(images)  # Shuffle the images randomly
             num_validation = int(len(images) * validation_split)
 
             # Move images to train folder
