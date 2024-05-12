@@ -1,9 +1,13 @@
 import os
 import shutil
 import random
+import torchvision
+from torchvision import datasets
+import torch
+from settings import batch_size, mean_std_normalization, input_shape
 
 
-def split_dataset(input_folder, train_folder, test_folder, validation_split=0.2, random_seed=42):
+def split_dataset(input_folder, train_folder, test_folder, validation_split=0.2, random_seed=42) -> None:
     """
     Split the dataset into train and test folders
     :param input_folder: Path to the input folder
@@ -47,6 +51,27 @@ def split_dataset(input_folder, train_folder, test_folder, validation_split=0.2,
                 src = os.path.join(class_path, image)
                 dst = os.path.join(test_class_path, image)
                 shutil.copy(src, dst)
+
+
+def load_data() -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    """
+    Load the dataset
+    :return: train_loader, validation_loader
+    """
+    # Access the transformation function applied during pre-training
+    transform = torchvision.models.EfficientNet_B0_Weights.IMAGENET1K_V1.transforms()
+
+    trainset = datasets.ImageFolder(os.path.join('./data/15SceneData/', 'train'), transform=transform)
+    print('Number of train examples:', len(trainset))
+
+    validationset = datasets.ImageFolder(os.path.join('./data/15SceneData/', 'test'), transform=transform)
+    print('Number of evaluation examples:', len(validationset))
+
+    # Creating a loader object to read and load a batch of data
+    train_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=0)
+    validation_loader = torch.utils.data.DataLoader(validationset, batch_size=batch_size, shuffle=False, num_workers=0)
+
+    return train_loader, validation_loader
 
 
 if __name__ == "__main__":
