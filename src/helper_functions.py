@@ -20,6 +20,7 @@ def train(model, train_loader, validation_loader):
     time_s = time.time()
 
     for epoch in range(Epochs):
+        print(f'Epoch {epoch + 1}/{Epochs}')
         itr = 0
         for inputs, labels in train_loader:
             inputs = inputs.to(device)
@@ -44,7 +45,7 @@ def train(model, train_loader, validation_loader):
     time_e = time.time()
     print("Training time in Mins : ", (time_e - time_s) / 60)
     # plotting the loss curve over all iteration
-    print('Train loss values per iteration')
+    print('Train loss values per epoch')
     print(train_loss_list_per_epoch)
     plt.plot(np.arange(len(train_loss_list_per_epoch)), train_loss_list_per_epoch, color='blue', label='Train')
     plt.plot(np.arange(len(val_loss_list)), val_loss_list, color='red', label='Validation')

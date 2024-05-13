@@ -7,6 +7,6 @@ if __name__ == "__main__":
     # Loading data
     train_loader, validation_loader = load_data()
     # creating a model
-    model = EfficientNetModel()
+    model = EfficientNetModel().model
     # training the model
     model = train(model, train_loader, validation_loader)
