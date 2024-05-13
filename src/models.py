@@ -3,7 +3,7 @@ from torch import nn
 from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 
 
-class EfficientNetModel():
+class EfficientNetModel:
     """
     We fine-tune a convolutional neural network architecture, pre-trained on the
     ImageNet dataset from the Pytorch deep learning library (on the 15 scene dataset).
@@ -22,9 +22,6 @@ class EfficientNetModel():
         # make all layers in feature extraction and classifier parts of the model trainable
         for param in self.model.parameters():
             param.requires_grad = True
-
-    def forward(self, x):
-        return self.model(x)
 
 
 if __name__ == "__main__":

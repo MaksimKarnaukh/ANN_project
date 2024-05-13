@@ -1,7 +1,7 @@
 import torch
 
 # batch_size
-batch_size = 15
+batch_size = 32
 # input shape
 # input_shape = [224, 224]
 
@@ -12,6 +12,6 @@ batch_size = 15
 # learning rate
 LR = 1e-3
 # number of epochs for training the model
-Epochs = 20
+Epochs = 10
 # GPU or CPU
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

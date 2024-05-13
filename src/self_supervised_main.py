@@ -12,6 +12,8 @@ from torchvision import transforms, datasets
 from torchvision.models import efficientnet_b0
 import os
 
+print(torch.cuda.is_available())
+
 train_loader, validation_loader = load_data_blurred()
 
 # Iterate over the train_loader to access a single batch

@@ -11,9 +11,9 @@ def train(model, train_loader, validation_loader):
     print('device:', device)
     model = model.to(device)
     # defining cross entropy loss
-    criterion = nn.CrossEntropyLoss().to(device)
-    # creating an optimizer object performing SGD algorithm
-    optimizer = optim.SGD(model.parameters(), lr=LR)
+    criterion = nn.CrossEntropyLoss() # .to(device)
+    # creating an optimizer object
+    optimizer = optim.Adam(model.parameters(), lr=LR)
     train_loss_list_per_epoch = []
     train_loss_list_per_itr = []
     val_loss_list = []
@@ -21,12 +21,13 @@ def train(model, train_loader, validation_loader):
     time_s = time.time()
 
     for epoch in range(Epochs):
+        model.train()
         print(f'Epoch {epoch + 1}/{Epochs}')
         itr = 0
         for inputs, labels in train_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
-            outputs = model(inputs)
+            outputs = model(inputs).to(device)
             loss = criterion(outputs, labels)
 
             # clearing old gradients from the last step
@@ -41,8 +42,10 @@ def train(model, train_loader, validation_loader):
         train_loss_list_per_epoch.append(np.mean(train_loss_list_per_itr))
         # Evaluate model for each update iteration
         eval_loss, eval_acc = evaluation(model, validation_loader, criterion)
+        print(f'Validation Loss: {eval_loss:.4f}, Validation Accuracy: {eval_acc:.4f}')
         val_loss_list.append(eval_loss)
         val_accuracy_per_epoch.append(eval_acc)
+
     time_e = time.time()
     print("Training time in Mins : ", (time_e - time_s) / 60)
     # plotting the loss curve over all iteration
@@ -61,6 +64,7 @@ def train(model, train_loader, validation_loader):
 
 
 def evaluation(model, validation_loader, criterion):
+    model.eval()
     model = model.to(device)
     val_loss = []
     real_label = None
@@ -68,7 +72,7 @@ def evaluation(model, validation_loader, criterion):
     for inputs, labels in validation_loader:
         inputs = inputs.to(device)
         labels = labels.to(device)
-        outputs = model(inputs)
+        outputs = model(inputs).to(device)
         loss = criterion(outputs, labels)
         val_loss.append(loss.item())
 
