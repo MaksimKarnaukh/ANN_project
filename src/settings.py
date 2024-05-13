@@ -3,7 +3,7 @@ import torch
 # batch_size
 batch_size = 15
 # input shape
-input_shape = [224, 224]
+# input_shape = [224, 224]
 
 # mean and standard deviation of each channel of input for performing normalization
 # mean_std_normalization = ([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
