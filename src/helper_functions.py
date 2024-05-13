@@ -8,9 +8,10 @@ from settings import Epochs, batch_size, LR, device
 
 
 def train(model, train_loader, validation_loader):
+    print('device:', device)
     model = model.to(device)
     # defining cross entropy loss
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss().to(device)
     # creating an optimizer object performing SGD algorithm
     optimizer = optim.SGD(model.parameters(), lr=LR)
     train_loss_list_per_epoch = []
