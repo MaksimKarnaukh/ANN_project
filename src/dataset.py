@@ -80,6 +80,8 @@ def load_data() -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoade
 def apply_gaussian_blur(image, kernel_size):
     """
     Apply Gaussian blur to the input image.
+    See https://docs.opencv.org/4.x/d4/d13/tutorial_py_filtering.html
+
     :param image: Input image
     :param kernel_size: Size of the Gaussian kernel
     :return: Blurred image
@@ -108,7 +110,8 @@ def load_data_blurred() -> tuple[torch.utils.data.DataLoader, torch.utils.data.D
     for image, label in trainset:
         for kernel_size in [5, 9, 13, 17, 21]:
             blurred_image = apply_gaussian_blur(image, kernel_size)
-            train_data.append((blurred_image, kernel_size))
+            train_data.append((blurred_image, {5: 0, 9: 1, 13: 2, 17: 3, 21: 4}[kernel_size]))
+
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=0)
 
     print('Number of train examples:', len(train_loader.dataset))
@@ -119,7 +122,7 @@ def load_data_blurred() -> tuple[torch.utils.data.DataLoader, torch.utils.data.D
     for image, label in validationset:
         for kernel_size in [5, 9, 13, 17, 21]:
             blurred_image = apply_gaussian_blur(image, kernel_size)
-            validation_data.append((blurred_image, kernel_size))
+            validation_data.append((blurred_image, {5: 0, 9: 1, 13: 2, 17: 3, 21: 4}[kernel_size]))
     validation_loader = torch.utils.data.DataLoader(validation_data, batch_size=batch_size, shuffle=False, num_workers=0)
 
     print('Number of evaluation examples:', len(validation_loader.dataset))

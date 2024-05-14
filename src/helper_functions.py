@@ -4,14 +4,14 @@ from torch import nn, optim
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.metrics import classification_report
-from settings import Epochs, batch_size, LR, device
+from settings import Epochs, LR, device
 
 
-def train(model, train_loader, validation_loader):
-    print('device:', device)
+def train(model, train_loader, validation_loader, output_path='../output/'):
+    print('Device used:', device)
     model = model.to(device)
     # defining cross entropy loss
-    criterion = nn.CrossEntropyLoss() # .to(device)
+    criterion = nn.CrossEntropyLoss()
     # creating an optimizer object
     optimizer = optim.Adam(model.parameters(), lr=LR)
     train_loss_list_per_epoch = []
@@ -22,7 +22,7 @@ def train(model, train_loader, validation_loader):
 
     for epoch in range(Epochs):
         model.train()
-        print(f'Epoch {epoch + 1}/{Epochs}')
+        start = time.time()
         itr = 0
         for inputs, labels in train_loader:
             inputs = inputs.to(device)
@@ -45,21 +45,24 @@ def train(model, train_loader, validation_loader):
         print(f'Validation Loss: {eval_loss:.4f}, Validation Accuracy: {eval_acc:.4f}')
         val_loss_list.append(eval_loss)
         val_accuracy_per_epoch.append(eval_acc)
+        end = time.time()
+
+        print(f'Epoch {epoch + 1}/{Epochs} done in {(end - start)} seconds ; Train Loss: {train_loss_list_per_epoch[-1]:.4f}')
 
     time_e = time.time()
     print("Training time in Mins : ", (time_e - time_s) / 60)
     # plotting the loss curve over all iteration
-    print('Train loss values per epoch')
+    print('Train loss values per epoch:')
     print(train_loss_list_per_epoch)
     plt.plot(np.arange(len(train_loss_list_per_epoch)), train_loss_list_per_epoch, color='blue', label='Train')
     plt.plot(np.arange(len(val_loss_list)), val_loss_list, color='red', label='Validation')
     plt.legend()
     plt.title('Train and Validation Loss')
-    plt.savefig('train_val_loss.png')
+    plt.savefig(output_path + f'train_val_loss.png')
     plt.cla()
     plt.plot(np.arange(len(val_accuracy_per_epoch)), val_accuracy_per_epoch, color='green', label='Validation')
     plt.title('Validation Accuracy')
-    plt.savefig('validation_accuracy.png')
+    plt.savefig(output_path + f'validation_accuracy.png')
     return model
 
 

@@ -12,22 +12,18 @@ from torchvision import transforms, datasets
 from torchvision.models import efficientnet_b0
 import os
 
-print(torch.cuda.is_available())
+if __name__ == "__main__":
 
-train_loader, validation_loader = load_data_blurred()
+    # Loading data
+    train_loader, validation_loader = load_data_blurred()
 
-# Iterate over the train_loader to access a single batch
-for images, labels in train_loader:
-    # Access the first image and its label from the batch
-    single_image = images[0]
-    single_label = labels[0]
-    # Print the image and its label
-    print("Label:", single_label.item())
-    # Convert the image tensor to numpy array and visualize it
-    image_np = single_image.permute(1, 2, 0).numpy()
-    plt.imshow(image_np)
-    plt.show()
-    break  # Exit the loop after printing the first image
+    # creating a model
+    model = EfficientNetModel(num_classes=5).model
+
+    # training the model
+    model = train(model, train_loader, validation_loader)
+
+
 
 # # Define device
 # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
