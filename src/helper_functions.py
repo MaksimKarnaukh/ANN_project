@@ -42,12 +42,14 @@ def train(model, train_loader, validation_loader, output_path='../output/'):
         train_loss_list_per_epoch.append(np.mean(train_loss_list_per_itr))
         # Evaluate model for each update iteration
         eval_loss, eval_acc = evaluation(model, validation_loader, criterion)
-        print(f'Validation Loss: {eval_loss:.4f}, Validation Accuracy: {eval_acc:.4f}')
+
         val_loss_list.append(eval_loss)
         val_accuracy_per_epoch.append(eval_acc)
         end = time.time()
 
-        print(f'Epoch {epoch + 1}/{Epochs} done in {(end - start)} seconds ; Train Loss: {train_loss_list_per_epoch[-1]:.4f}')
+        print(f'Epoch {epoch + 1}/{Epochs} done in {(end - start):.2f} seconds ; Train Loss: {train_loss_list_per_epoch[-1]:.4f}')
+        print(f'Validation Loss: {eval_loss:.4f}, Validation Accuracy: {eval_acc:.4f}')
+        print('---')
 
     time_e = time.time()
     print("Training time in Mins : ", (time_e - time_s) / 60)

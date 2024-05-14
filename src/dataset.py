@@ -10,7 +10,7 @@ import cv2
 
 def split_dataset(input_folder, train_folder, test_folder, validation_split=0.2, random_seed=42) -> None:
     """
-    Split the dataset into train and test folders
+    Split the dataset into train and test folders.
     :param input_folder: Path to the input folder
     :param train_folder: Path to the train folder
     :param test_folder: Path to the test folder
@@ -56,7 +56,7 @@ def split_dataset(input_folder, train_folder, test_folder, validation_split=0.2,
 
 def load_data() -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """
-    Load the dataset
+    Load the dataset.
     :return: train_loader, validation_loader
     """
     # Access the transformation function applied during pre-training
