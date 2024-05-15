@@ -88,13 +88,11 @@ def apply_gaussian_blur(image: torch.Tensor, kernel_size: int) -> torch.Tensor:
     :param kernel_size: Size of the Gaussian kernel
     :return: Blurred image
     """
-    # blurred_image = cv2.GaussianBlur(image, (kernel_size, kernel_size), 0)
-    # return blurred_image
     # Convert image tensor to numpy array
     image_np = image.permute(1, 2, 0).numpy()
     # Apply Gaussian blur
     blurred_image = cv2.GaussianBlur(image_np, (kernel_size, kernel_size), 0)
-    # Convert back to tensor and return
+    # Convert back to tensor
     return torch.tensor(blurred_image).permute(2, 0, 1)
 
 
