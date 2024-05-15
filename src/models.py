@@ -10,6 +10,15 @@ class EfficientNetModel:
     We will use a pre-trained EfficientNet-B0 architecture from the Pytorch deep
     learning library. We make all layers in feature extraction and classifier parts of the
     model trainable.
+
+    Args:
+        num_classes: The number of output classes in the final layer.
+    Attributes:
+        model: The pre-trained EfficientNet-B0 model.
+
+    Methods:
+        replace_classifier: Replace the classifier of the model with a new classifier with num_classes output units.
+        set_trainable: Set the feature extraction layers of the model to be trainable or frozen. By default, the classifier part stays trainable.
     """
     def __init__(self, num_classes=15):
         """

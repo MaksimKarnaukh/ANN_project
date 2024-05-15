@@ -6,6 +6,9 @@ from torchvision import datasets
 import torch
 from settings import batch_size
 import cv2
+import numpy as np
+import copy
+import matplotlib.pyplot as plt
 
 
 def split_dataset(input_folder, train_folder, test_folder, validation_split=0.2, random_seed=42) -> None:
@@ -109,7 +112,8 @@ def load_data_blurred() -> tuple[torch.utils.data.DataLoader, torch.utils.data.D
     train_data = []
     for image, label in trainset:
         for kernel_size in [5, 9, 13, 17, 21]:
-            blurred_image = apply_gaussian_blur(image, kernel_size)
+            img = copy.deepcopy(image)
+            blurred_image = apply_gaussian_blur(img, kernel_size)
             train_data.append((blurred_image, {5: 0, 9: 1, 13: 2, 17: 3, 21: 4}[kernel_size]))
 
     train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=0)
@@ -121,8 +125,74 @@ def load_data_blurred() -> tuple[torch.utils.data.DataLoader, torch.utils.data.D
     validation_data = []
     for image, label in validationset:
         for kernel_size in [5, 9, 13, 17, 21]:
-            blurred_image = apply_gaussian_blur(image, kernel_size)
+            img = copy.deepcopy(image)
+            blurred_image = apply_gaussian_blur(img, kernel_size)
             validation_data.append((blurred_image, {5: 0, 9: 1, 13: 2, 17: 3, 21: 4}[kernel_size]))
+    validation_loader = torch.utils.data.DataLoader(validation_data, batch_size=batch_size, shuffle=False, num_workers=0)
+
+    print('Number of evaluation examples:', len(validation_loader.dataset))
+    print('Done loading data...')
+
+    return train_loader, validation_loader
+
+
+def apply_black_white_perturbation(image, perturbation_type):
+    """
+    Apply black or white perturbation to the input image.
+
+    :param image: Input image tensor (shape: C x H x W)
+    :param perturbation_type: Type of perturbation ('black' or 'white')
+    :return: Perturbed image tensor
+    """
+    image_np = image.permute(1, 2, 0).numpy()
+
+    # Define a random square region with shape 10x10
+    region = np.random.randint(0, min(image_np.shape[0], image_np.shape[1]) - 10, size=2)
+    x, y = region
+
+    # Apply perturbation based on the type
+    if perturbation_type == 'black':
+        image_np[x:x + 10, y:y + 10, :] = 0  # Set the region to black
+    elif perturbation_type == 'white':
+        image_np[x:x + 10, y:y + 10, :] = 255  # Set the region to white
+
+    # Convert back to tensor and return
+    return torch.tensor(image_np).permute(2, 0, 1)
+
+
+def load_data_perturbation(random_seed=42) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+    """
+    Load the dataset with each image replaced by its perturbed versions, each with the correct label.
+    :return: train_loader, validation_loader
+    """
+    if random_seed is not None:
+        random.seed(random_seed)
+
+    # Access the transformation function applied during pre-training
+    transform = torchvision.models.EfficientNet_B0_Weights.IMAGENET1K_V1.transforms()
+
+    # Load train set
+    trainset = datasets.ImageFolder(os.path.join('../15SceneData/', 'train'), transform=transform)
+    train_data = []
+    for image, label in trainset:
+        for perturbation_type in ['black', 'white']:
+            img = copy.deepcopy(image)
+            perturbed_image = apply_black_white_perturbation(img, perturbation_type)
+            train_data.append((perturbed_image, {'black': 0, 'white': 1}[perturbation_type]))
+
+    train_loader = torch.utils.data.DataLoader(train_data, batch_size=batch_size, shuffle=True, num_workers=0)
+
+    print('Number of train examples:', len(train_loader.dataset))
+
+    # Load validation set
+    validationset = datasets.ImageFolder(os.path.join('../15SceneData/', 'test'), transform=transform)
+    validation_data = []
+    for image, label in validationset:
+        for perturbation_type in ['black', 'white']:
+            img = copy.deepcopy(image)
+            perturbed_image = apply_black_white_perturbation(img, perturbation_type)
+            validation_data.append((perturbed_image, {'black': 0, 'white': 1}[perturbation_type]))
+
     validation_loader = torch.utils.data.DataLoader(validation_data, batch_size=batch_size, shuffle=False, num_workers=0)
 
     print('Number of evaluation examples:', len(validation_loader.dataset))
