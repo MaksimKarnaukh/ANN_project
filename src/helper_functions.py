@@ -7,7 +7,7 @@ from sklearn.metrics import classification_report
 from settings import Epochs, LR, device, batch_size
 
 
-def train(model, train_loader, validation_loader, output_path: str = '../output/', verbose: str = True):
+def train(model: any, train_loader: torch.utils.data.DataLoader, validation_loader: torch.utils.data.DataLoader, output_path: str = '../output/', verbose: str = True):
     """
     Function to train the model.
     :param model: Model to train
@@ -80,7 +80,7 @@ def train(model, train_loader, validation_loader, output_path: str = '../output/
     return model
 
 
-def evaluation(model, validation_loader, criterion):
+def evaluation(model: any, validation_loader: torch.utils.data.DataLoader, criterion: any):
     """
     Function to evaluate the model.
     :param model: Model to evaluate

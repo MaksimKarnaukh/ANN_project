@@ -8,10 +8,9 @@ from settings import batch_size
 import cv2
 import numpy as np
 import copy
-import matplotlib.pyplot as plt
 
 
-def split_dataset(input_folder, train_folder, test_folder, validation_split=0.2, random_seed=42) -> None:
+def split_dataset(input_folder: str, train_folder: str, test_folder: str, validation_split: float = 0.2, random_seed: int = 42) -> None:
     """
     Split the dataset into train and test folders.
     :param input_folder: Path to the input folder
@@ -80,7 +79,7 @@ def load_data() -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoade
     return train_loader, validation_loader
 
 
-def apply_gaussian_blur(image, kernel_size):
+def apply_gaussian_blur(image: torch.Tensor, kernel_size: int) -> torch.Tensor:
     """
     Apply Gaussian blur to the input image.
     See https://docs.opencv.org/4.x/d4/d13/tutorial_py_filtering.html
@@ -136,13 +135,13 @@ def load_data_blurred() -> tuple[torch.utils.data.DataLoader, torch.utils.data.D
     return train_loader, validation_loader
 
 
-def apply_black_white_perturbation(image, perturbation_type):
+def apply_black_white_perturbation(image: torch.Tensor, perturbation_type: str) -> torch.Tensor:
     """
     Apply black or white perturbation to the input image.
 
     :param image: Input image tensor (shape: C x H x W)
     :param perturbation_type: Type of perturbation ('black' or 'white')
-    :return: Perturbed image tensor
+    :return: Perturbed image
     """
     image_np = image.permute(1, 2, 0).numpy()
 
@@ -160,7 +159,7 @@ def apply_black_white_perturbation(image, perturbation_type):
     return torch.tensor(image_np).permute(2, 0, 1)
 
 
-def load_data_perturbation(random_seed=42) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+def load_data_perturbation(random_seed: int = 42) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """
     Load the dataset with each image replaced by its perturbed versions, each with the correct label.
     :return: train_loader, validation_loader
@@ -202,6 +201,7 @@ def load_data_perturbation(random_seed=42) -> tuple[torch.utils.data.DataLoader,
 
 
 if __name__ == "__main__":
+    # Split the dataset into train and test folders. Should only be executed in case the dataset is not already split.
     input_folder = "../15SceneData"
     train_folder = "train"
     test_folder = "test"

@@ -59,11 +59,3 @@ class EfficientNetModel:
         else:
             for param in self.model.parameters():
                 param.requires_grad = True
-
-
-if __name__ == "__main__":
-    # quick test
-    model = EfficientNetModel()
-    print(model.model)
-    x = torch.randn(1, 3, 224, 224)
-    print(model.model(x).shape)
