@@ -4,11 +4,21 @@ from torch import nn, optim
 import numpy as np
 from matplotlib import pyplot as plt
 from sklearn.metrics import classification_report
-from settings import Epochs, LR, device
+from settings import Epochs, LR, device, batch_size
 
 
-def train(model, train_loader, validation_loader, output_path='../output/'):
+def train(model, train_loader, validation_loader, output_path: str = '../output/', verbose: str = True):
+    """
+    Function to train the model.
+    :param model: Model to train
+    :param train_loader: DataLoader for training data
+    :param validation_loader: DataLoader for validation data
+    :param output_path: Path to save the plots
+    :param verbose: whether to print extra output
+    :return: Trained model
+    """
     print('Device used:', device)
+
     model = model.to(device)
     # defining cross entropy loss
     criterion = nn.CrossEntropyLoss()
@@ -47,9 +57,10 @@ def train(model, train_loader, validation_loader, output_path='../output/'):
         val_accuracy_per_epoch.append(eval_acc)
         end = time.time()
 
-        print(f'Epoch {epoch + 1}/{Epochs} done in {(end - start):.2f} seconds ; Train Loss: {train_loss_list_per_epoch[-1]:.4f}')
-        print(f'Validation Loss: {eval_loss:.4f}, Validation Accuracy: {eval_acc:.4f}')
-        print('---')
+        if verbose:
+            print(f'Epoch {epoch + 1}/{Epochs} done in {(end - start):.2f} seconds ; Train Loss: {train_loss_list_per_epoch[-1]:.4f}')
+            print(f'Validation Loss: {eval_loss:.4f}, Validation Accuracy: {eval_acc:.4f}')
+            print('---')
 
     time_e = time.time()
     print("Training time in Mins : ", (time_e - time_s) / 60)
@@ -60,15 +71,23 @@ def train(model, train_loader, validation_loader, output_path='../output/'):
     plt.plot(np.arange(len(val_loss_list)), val_loss_list, color='red', label='Validation')
     plt.legend()
     plt.title('Train and Validation Loss')
-    plt.savefig(output_path + f'train_val_loss.png')
+    settings_string = f"_{LR}_Adam_{batch_size}_{Epochs}"
+    plt.savefig(output_path + f'train_val_loss{settings_string}.png')
     plt.cla()
     plt.plot(np.arange(len(val_accuracy_per_epoch)), val_accuracy_per_epoch, color='green', label='Validation')
     plt.title('Validation Accuracy')
-    plt.savefig(output_path + f'validation_accuracy.png')
+    plt.savefig(output_path + f'validation_accuracy{settings_string}.png')
     return model
 
 
 def evaluation(model, validation_loader, criterion):
+    """
+    Function to evaluate the model.
+    :param model: Model to evaluate
+    :param validation_loader: DataLoader for validation data
+    :param criterion: Loss function
+    :return: Mean loss and accuracy
+    """
     model.eval()
     model = model.to(device)
     val_loss = []
