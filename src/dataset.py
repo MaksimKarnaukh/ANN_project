@@ -4,7 +4,6 @@ import random
 import torchvision
 from torchvision import datasets
 import torch
-from settings import batch_size
 import cv2
 import numpy as np
 import copy
@@ -56,7 +55,7 @@ def split_dataset(input_folder: str, train_folder: str, test_folder: str, valida
                 shutil.copy(src, dst)
 
 
-def load_data() -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+def load_data(batch_size: int = 32) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """
     Load the dataset.
     :return: train_loader, validation_loader
@@ -96,7 +95,7 @@ def apply_gaussian_blur(image: torch.Tensor, kernel_size: int) -> torch.Tensor:
     return torch.tensor(blurred_image).permute(2, 0, 1)
 
 
-def load_data_blurred() -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+def load_data_blurred(batch_size: int = 32) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """
     Load the dataset with each image replaced by its five different blurred versions, each with the correct label.
     :return: train_loader, validation_loader
@@ -157,7 +156,7 @@ def apply_black_white_perturbation(image: torch.Tensor, perturbation_type: str) 
     return torch.tensor(image_np).permute(2, 0, 1)
 
 
-def load_data_perturbation(random_seed: int = 42) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
+def load_data_perturbation(random_seed: int = 42, batch_size: int = 32) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """
     Load the dataset with each image replaced by its perturbed versions, each with the correct label.
     :return: train_loader, validation_loader
