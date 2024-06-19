@@ -73,7 +73,7 @@ def load_data(batch_size: int = 32) -> tuple[torch.utils.data.DataLoader, torch.
     train_loader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=True, num_workers=0)
     validation_loader = torch.utils.data.DataLoader(validationset, batch_size=batch_size, shuffle=False, num_workers=0)
 
-    print('Done loading data...')
+    print(f'Done loading data (batch size: {batch_size}) ...')
 
     return train_loader, validation_loader
 
@@ -127,7 +127,7 @@ def load_data_blurred(batch_size: int = 32) -> tuple[torch.utils.data.DataLoader
     validation_loader = torch.utils.data.DataLoader(validation_data, batch_size=batch_size, shuffle=False, num_workers=0)
 
     print('Number of evaluation examples:', len(validation_loader.dataset))
-    print('Done loading data...')
+    print(f'Done loading data (batch size: {batch_size}) ...')
 
     return train_loader, validation_loader
 
@@ -192,7 +192,7 @@ def load_data_perturbation(random_seed: int = 42, batch_size: int = 32) -> tuple
     validation_loader = torch.utils.data.DataLoader(validation_data, batch_size=batch_size, shuffle=False, num_workers=0)
 
     print('Number of evaluation examples:', len(validation_loader.dataset))
-    print('Done loading data...')
+    print(f'Done loading data (batch size: {batch_size}) ...')
 
     return train_loader, validation_loader
 

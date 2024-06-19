@@ -12,7 +12,7 @@ import pandas as pd
 
 
 def train(model: any, param_dict: dict, train_loader: torch.utils.data.DataLoader, validation_loader: torch.utils.data.DataLoader,
-          output_path: str = '../output/', verbose: bool = True) -> any:
+          output_path: str = '../output/', verbose: int = 1) -> any:
     """
     Function to train the model.
     :param model: Model to train
@@ -33,8 +33,6 @@ def train(model: any, param_dict: dict, train_loader: torch.utils.data.DataLoade
     except KeyError as e:
         print(f"Missing parameter: {e}")
         return
-
-    print('Device used:', device)
 
     model = model.to(device)
     # defining cross entropy loss
@@ -92,10 +90,11 @@ def train(model: any, param_dict: dict, train_loader: torch.utils.data.DataLoade
             print('---')
 
     time_e = time.time()
-    print("Training time in Mins : ", (time_e - time_s) / 60)
+    if verbose > 1:
+        print("Training time in Mins : ", (time_e - time_s) / 60)
+        print('Train loss values per epoch:')
+        print(train_loss_list_per_epoch)
     # plotting the loss curve over all iteration
-    print('Train loss values per epoch:')
-    print(train_loss_list_per_epoch)
     plt.plot(np.arange(len(train_loss_list_per_epoch)), train_loss_list_per_epoch, color='blue', label='Train')
     plt.plot(np.arange(len(val_loss_list)), val_loss_list, color='red', label='Validation')
     plt.legend()
@@ -106,6 +105,7 @@ def train(model: any, param_dict: dict, train_loader: torch.utils.data.DataLoade
     plt.plot(np.arange(len(val_accuracy_per_epoch)), val_accuracy_per_epoch, color='green', label='Validation')
     plt.title('Validation Accuracy')
     plt.savefig(output_path + f'validation_accuracy{settings_string}.png')
+    plt.cla()
     return model, best_epoch_accuracy, val_accuracy_per_epoch[-1]
 
 
@@ -160,7 +160,10 @@ def gridsearch(param_grid: dict, output_path: str, num_classes: int):
     best_model = None
     best_accuracy = 0.0
 
-    results_df = pd.DataFrame(columns=['learning_rate', 'batch_size', 'epochs', 'linear_layer_in_features', 'optimizer', 'best_epoch_accuracy', 'last_epoch_accuracy'])
+    results_list = []
+    param_iter = 0
+
+    print('Device used:', device)
 
     for batch_size in param_grid['batch_size']:
 
@@ -170,26 +173,26 @@ def gridsearch(param_grid: dict, output_path: str, num_classes: int):
         for learning_rate, epochs, linear_layer_in_features, optimizer in product(
                 param_grid['learning_rate'], param_grid['epochs'],
                 param_grid['linear_layer_in_features'], param_grid['optimizer']):
-            print(
-                f"Training with learning_rate={learning_rate}, epochs={epochs}, linear_layer_in_features={linear_layer_in_features}, optimizer={optimizer}, batch_size={batch_size}")
+
 
             # Create the model with the current hyperparameters
             model = EfficientNetModel(num_classes=num_classes, linear_layer_in_features=linear_layer_in_features).model
 
             # Train and evaluate the model
-            trained_model, best_epoch_accuracy, last_epoch_accuracy = train(model, {'learning_rate': learning_rate, 'batch_size': batch_size, 'epochs': epochs, 'linear_layer_in_features': linear_layer_in_features}, train_loader, validation_loader,
-                                  output_path, verbose=False)
+            trained_model, best_epoch_accuracy, last_epoch_accuracy = train(model, {'learning_rate': learning_rate, 'batch_size': batch_size, 'epochs': epochs, 'linear_layer_in_features': linear_layer_in_features, 'optimizer': optimizer}, train_loader, validation_loader,
+                                  output_path, verbose=0)
 
-            # Update the results DataFrame
-            results_df = results_df.append({
-                'learning_rate': learning_rate,
-                'batch_size': batch_size,
-                'epochs': epochs,
-                'linear_layer_in_features': linear_layer_in_features,
-                'optimizer': optimizer,
-                'best_epoch_accuracy': best_epoch_accuracy,
-                'last_epoch_accuracy': last_epoch_accuracy
-            }, ignore_index=True)
+            # Append results to the list
+            results_list.append([
+                len(results_list),
+                learning_rate,
+                batch_size,
+                epochs,
+                linear_layer_in_features,
+                optimizer,
+                best_epoch_accuracy,
+                last_epoch_accuracy
+            ])
 
             # Update the best parameters if current accuracy is better
             if last_epoch_accuracy > best_accuracy:
@@ -203,8 +206,14 @@ def gridsearch(param_grid: dict, output_path: str, num_classes: int):
                 }
                 best_model = trained_model
 
-    # Write the results DataFrame to an Excel file
-    results_df.to_excel(output_path + 'grid_search_results.xlsx', index=True)
+            param_iter += 1
+            print(
+                f"Completed Training ({param_iter}) with {{learning_rate={learning_rate}, epochs={epochs}, linear_layer_in_features={linear_layer_in_features}, optimizer={optimizer}, batch_size={batch_size}}}")
+
+    print('Grid search completed.')
+    results_df = pd.DataFrame(results_list, columns=['index', 'lr', 'batch_size', 'epochs', 'linear_layers', 'optimizer', 'best_epoch_acc', 'last_epoch_acc'])
+    print("Saving grid search results to", output_path + 'grid_search_results.xlsx')
+    results_df.to_excel(output_path + 'grid_search_results.xlsx', index=False)
 
     print(f"Best parameters: {best_params}")
     print(f"Best validation accuracy: {best_accuracy}")
