@@ -58,6 +58,7 @@ def split_dataset(input_folder: str, train_folder: str, test_folder: str, valida
 def load_data(batch_size: int = 32) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """
     Load the dataset.
+    :param batch_size: Batch size
     :return: train_loader, validation_loader
     """
     # Access the transformation function applied during pre-training
@@ -98,6 +99,7 @@ def apply_gaussian_blur(image: torch.Tensor, kernel_size: int) -> torch.Tensor:
 def load_data_blurred(batch_size: int = 32) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """
     Load the dataset with each image replaced by its five different blurred versions, each with the correct label.
+    :param batch_size: Batch size
     :return: train_loader, validation_loader
     """
     # Access the transformation function applied during pre-training
@@ -159,6 +161,8 @@ def apply_black_white_perturbation(image: torch.Tensor, perturbation_type: str) 
 def load_data_perturbation(random_seed: int = 42, batch_size: int = 32) -> tuple[torch.utils.data.DataLoader, torch.utils.data.DataLoader]:
     """
     Load the dataset with each image replaced by its perturbed versions, each with the correct label.
+    :param random_seed: Random seed
+    :param batch_size: Batch size
     :return: train_loader, validation_loader
     """
     if random_seed is not None:

@@ -21,7 +21,7 @@ def train(model: any, param_dict: dict, train_loader: torch.utils.data.DataLoade
     :param train_loader: DataLoader for training data
     :param validation_loader: DataLoader for validation data
     :param output_path: Path to save the plots
-    :param verbose: whether to print extra output
+    :param verbose: whether to print extra output, 0 for none, 1 for some, 2 for all
     :return: Trained model
     """
 
@@ -149,13 +149,14 @@ def evaluation(model: any, validation_loader: torch.utils.data.DataLoader, crite
     return np.mean(val_loss), eval_acc
 
 
-def gridsearch(param_grid: dict, output_path: str, num_classes: int, data_loading="default", model_=None) -> any:
+def gridsearch(param_grid: dict, output_path: str, num_classes: int, data_loading="default", model_: any = None) -> any:
     """
     Function to perform grid search.
     :param param_grid: Dictionary of hyperparameters to search
-    :param output_path: Path to save the plots
+    :param output_path: Path to save the plots and dataframes
     :param num_classes: Number of classes
     :param data_loading: Type of data loading, either 'default', 'blurred' or 'perturbation'
+    :param model_: Model to use for training, necessary when we do scene classification for the pipeline tasks
     :return: Best model
     """
 
@@ -205,7 +206,7 @@ def gridsearch(param_grid: dict, output_path: str, num_classes: int, data_loadin
                 last_epoch_accuracy
             ])
 
-            # Update the best parameters if current accuracy is better
+            # Update the best parameters and such if current accuracy is better
             if last_epoch_accuracy > best_accuracy:
                 best_accuracy = last_epoch_accuracy
                 best_params = {
