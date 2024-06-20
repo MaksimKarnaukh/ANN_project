@@ -7,8 +7,9 @@ from sklearn.metrics import classification_report
 from settings import device
 from itertools import product
 from models import EfficientNetModel
-from dataset import load_data
+from dataset import load_data, load_data_blurred, load_data_perturbation
 import pandas as pd
+import copy
 
 
 def train(model: any, param_dict: dict, train_loader: torch.utils.data.DataLoader, validation_loader: torch.utils.data.DataLoader,
@@ -16,7 +17,7 @@ def train(model: any, param_dict: dict, train_loader: torch.utils.data.DataLoade
     """
     Function to train the model.
     :param model: Model to train
-    :param param_dict: Dictionary of hyperparameters
+    :param param_dict: Dictionary of hyperparameters and their explicit values for this training run
     :param train_loader: DataLoader for training data
     :param validation_loader: DataLoader for validation data
     :param output_path: Path to save the plots
@@ -48,7 +49,6 @@ def train(model: any, param_dict: dict, train_loader: torch.utils.data.DataLoade
         raise ValueError(f"Unknown optimizer: {param_optimizer}")
 
     train_loss_list_per_epoch = []
-    train_loss_list_per_itr = []
     val_loss_list = []
     val_accuracy_per_epoch = []
     best_epoch_accuracy = 0.0
@@ -58,6 +58,7 @@ def train(model: any, param_dict: dict, train_loader: torch.utils.data.DataLoade
         model.train()
         start = time.time()
         itr = 0
+        train_loss_list_per_itr = []
         for inputs, labels in train_loader:
             inputs = inputs.to(device)
             labels = labels.to(device)
@@ -148,11 +149,13 @@ def evaluation(model: any, validation_loader: torch.utils.data.DataLoader, crite
     return np.mean(val_loss), eval_acc
 
 
-def gridsearch(param_grid: dict, output_path: str, num_classes: int):
+def gridsearch(param_grid: dict, output_path: str, num_classes: int, data_loading="default", model_=None) -> any:
     """
     Function to perform grid search.
     :param param_grid: Dictionary of hyperparameters to search
     :param output_path: Path to save the plots
+    :param num_classes: Number of classes
+    :param data_loading: Type of data loading, either 'default', 'blurred' or 'perturbation'
     :return: Best model
     """
 
@@ -160,7 +163,7 @@ def gridsearch(param_grid: dict, output_path: str, num_classes: int):
     best_model = None
     best_accuracy = 0.0
 
-    results_list = []
+    results_list = []  # List to store the results for the dataframe/excel file later
     param_iter = 0
 
     print('Device used:', device)
@@ -168,19 +171,27 @@ def gridsearch(param_grid: dict, output_path: str, num_classes: int):
     for batch_size in param_grid['batch_size']:
 
         # Load the data using the current batch size
-        train_loader, validation_loader = load_data(batch_size=batch_size)
+        if data_loading == "default":
+            train_loader, validation_loader = load_data(batch_size=batch_size)
+        elif data_loading == "blurred":
+            train_loader, validation_loader = load_data_blurred(batch_size=batch_size)
+        elif data_loading == "perturbation":
+            train_loader, validation_loader = load_data_perturbation(batch_size=batch_size)
 
         for learning_rate, epochs, linear_layer_in_features, optimizer in product(
                 param_grid['learning_rate'], param_grid['epochs'],
                 param_grid['linear_layer_in_features'], param_grid['optimizer']):
 
-
-            # Create the model with the current hyperparameters
-            model = EfficientNetModel(num_classes=num_classes, linear_layer_in_features=linear_layer_in_features).model
+            # Create the model
+            if model_ is None:
+                model = EfficientNetModel(num_classes=num_classes, linear_layer_in_features=linear_layer_in_features)
+            else:
+                model = copy.deepcopy(model_)
 
             # Train and evaluate the model
-            trained_model, best_epoch_accuracy, last_epoch_accuracy = train(model, {'learning_rate': learning_rate, 'batch_size': batch_size, 'epochs': epochs, 'linear_layer_in_features': linear_layer_in_features, 'optimizer': optimizer}, train_loader, validation_loader,
+            trained_model, best_epoch_accuracy, last_epoch_accuracy = train(model.model, {'learning_rate': learning_rate, 'batch_size': batch_size, 'epochs': epochs, 'linear_layer_in_features': linear_layer_in_features, 'optimizer': optimizer}, train_loader, validation_loader,
                                   output_path, verbose=0)
+            model.model = trained_model
 
             # Append results to the list
             results_list.append([
@@ -204,7 +215,8 @@ def gridsearch(param_grid: dict, output_path: str, num_classes: int):
                     'optimizer': optimizer,
                     'batch_size': batch_size
                 }
-                best_model = trained_model
+
+                best_model = model
 
             param_iter += 1
             print(
